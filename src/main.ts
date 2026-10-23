@@ -10,6 +10,7 @@ import { ClubDiscoveryModule } from './modules/club-discovery/clubDiscovery';
 import { EventManagementModule } from './modules/event-management/eventManagement';
 import { ParticipationModule } from './modules/participation/participation';
 import { ClubManagementModule } from './modules/club-management/clubManagement';
+import { UniversityAdminModule } from './modules/university-admin/universityAdmin';
 
 type NavTab = 'events' | 'clubs' | 'my-registrations' | 'club-admin' | 'platform-admin';
 
@@ -130,7 +131,7 @@ class AppController {
         break;
 
       case 'platform-admin':
-        this.renderAdminPlaceholder(mainContent, 'Platform & University Administration', 'Phase (e) will implement new club approvals and review of flagged moderation reports.');
+        UniversityAdminModule.render(mainContent);
         break;
 
       default:
@@ -140,20 +141,7 @@ class AppController {
 
 
 
-  private static renderAdminPlaceholder(container: HTMLElement, title: string, description: string): void {
-    container.innerHTML = `
-      <section class="section-container">
-        <div class="section-header">
-          <h1 class="page-title">${title}</h1>
-        </div>
-        <div style="background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 3rem; text-align: center;">
-          <p style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔒</p>
-          <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Module Scheduled in Roadmap</h3>
-          <p style="color: var(--text-muted); max-width: 550px; margin: 0 auto;">${description}</p>
-        </div>
-      </section>
-    `;
-  }
+
 }
 
 // Run when DOM is ready
