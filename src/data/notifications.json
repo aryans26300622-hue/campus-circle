@@ -1,0 +1,20 @@
+[
+  {
+    "id": "notif-001",
+    "userId": "usr-student-1",
+    "title": "Registration Confirmed",
+    "message": "You have successfully registered for 'Intro to Autonomous Drones Workshop'.",
+    "type": "registration",
+    "read": false,
+    "createdAt": "2026-10-21T14:00:05Z"
+  },
+  {
+    "id": "notif-002",
+    "userId": "usr-student-1",
+    "title": "Welcome to CampusCircle",
+    "message": "Explore upcoming club events, join organizations, and stay involved on campus!",
+    "type": "system",
+    "read": true,
+    "createdAt": "2026-10-20T08:00:00Z"
+  }
+]

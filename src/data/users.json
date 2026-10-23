@@ -1,0 +1,31 @@
+[
+  {
+    "id": "usr-student-1",
+    "name": "Alice Chen",
+    "email": "alice.chen@campus.edu",
+    "role": "student",
+    "joinedClubIds": ["club-1", "club-2"]
+  },
+  {
+    "id": "usr-student-2",
+    "name": "David Kim",
+    "email": "david.kim@campus.edu",
+    "role": "student",
+    "joinedClubIds": ["club-3"]
+  },
+  {
+    "id": "usr-admin-robotics",
+    "name": "Bob Smith",
+    "email": "bob.smith@campus.edu",
+    "role": "club_admin",
+    "clubId": "club-1",
+    "joinedClubIds": ["club-1"]
+  },
+  {
+    "id": "usr-platform-admin",
+    "name": "Dr. Carol Vance",
+    "email": "carol.vance@campus.edu",
+    "role": "platform_admin",
+    "joinedClubIds": []
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "registrationId": "reg-001",
+    "studentId": "usr-student-1",
+    "studentName": "Alice Chen",
+    "studentEmail": "alice.chen@campus.edu",
+    "eventId": "evt-101",
+    "status": "REGISTERED",
+    "registeredAt": "2026-10-21T14:00:00Z"
+  },
+  {
+    "registrationId": "reg-002",
+    "studentId": "usr-student-1",
+    "studentName": "Alice Chen",
+    "studentEmail": "alice.chen@campus.edu",
+    "eventId": "evt-103",
+    "status": "REGISTERED",
+    "registeredAt": "2026-10-22T09:15:00Z"
+  },
+  {
+    "registrationId": "reg-003",
+    "studentId": "usr-student-2",
+    "studentName": "David Kim",
+    "studentEmail": "david.kim@campus.edu",
+    "eventId": "evt-103",
+    "status": "REGISTERED",
+    "registeredAt": "2026-10-22T10:30:00Z"
+  }
+]

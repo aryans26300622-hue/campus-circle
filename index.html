@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CampusCircle — Campus Clubs & Events Platform</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Header / Nav -->
+      <header class="app-header">
+        <div class="header-container">
+          <div class="logo">
+            <span class="logo-icon">🎓</span>
+            <span class="logo-text">CampusCircle</span>
+          </div>
+
+          <!-- Role Switcher -->
+          <div class="role-selector-wrap">
+            <label for="role-select">Viewing as:</label>
+            <select id="role-select" class="role-dropdown">
+              <!-- Populated by session manager -->
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Shell -->
+      <main id="main-content" class="main-content">
+        <div class="loading-state">Initializing CampusCircle...</div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="app-footer">
+        <div class="footer-container">
+          <p>© 2026 CampusCircle. Campus clubs and events discovery platform.</p>
+        </div>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

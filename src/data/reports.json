@@ -1,0 +1,25 @@
+[
+  {
+    "id": "rep-001",
+    "reporterId": "usr-student-2",
+    "reporterName": "David Kim",
+    "targetType": "event",
+    "targetId": "evt-103",
+    "targetTitle": "Improv Comedy Night",
+    "reason": "Late night volume might conflict with quiet hours in the adjacent dorms.",
+    "status": "pending",
+    "createdAt": "2026-10-23T11:00:00Z"
+  },
+  {
+    "id": "rep-002",
+    "reporterId": "usr-student-1",
+    "reporterName": "Alice Chen",
+    "targetType": "club",
+    "targetId": "club-2",
+    "targetTitle": "Campus Debate Union",
+    "reason": "Contact email was returning an auto-response about summer recess.",
+    "status": "resolved",
+    "resolutionNotes": "Verified club email is active again for the fall semester.",
+    "createdAt": "2026-10-10T16:20:00Z"
+  }
+]

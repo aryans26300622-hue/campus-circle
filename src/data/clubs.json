@@ -1,0 +1,67 @@
+[
+  {
+    "id": "club-1",
+    "name": "Robotics Society",
+    "description": "Building autonomous drones, battle bots, and exploring embedded hardware.",
+    "category": "Technology",
+    "leadId": "usr-admin-robotics",
+    "leadName": "Bob Smith",
+    "memberCount": 42,
+    "status": "approved",
+    "contactEmail": "robotics@campus.edu",
+    "imageUrl": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=600&q=80",
+    "createdAt": "2026-08-15"
+  },
+  {
+    "id": "club-2",
+    "name": "Campus Debate Union",
+    "description": "Fostering critical thinking, parliamentary debate, and public speaking excellence.",
+    "category": "Academic",
+    "leadId": "usr-admin-debate",
+    "leadName": "Elena Rostova",
+    "memberCount": 28,
+    "status": "approved",
+    "contactEmail": "debate@campus.edu",
+    "imageUrl": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80",
+    "createdAt": "2026-08-20"
+  },
+  {
+    "id": "club-3",
+    "name": "Drama & Theater Troupe",
+    "description": "Student-led theatrical productions, stage improv, and scriptwriting workshops.",
+    "category": "Arts & Culture",
+    "leadId": "usr-admin-drama",
+    "leadName": "Marcus Brody",
+    "memberCount": 35,
+    "status": "approved",
+    "contactEmail": "theater@campus.edu",
+    "imageUrl": "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=600&q=80",
+    "createdAt": "2026-09-01"
+  },
+  {
+    "id": "club-4",
+    "name": "Green Campus Initiative",
+    "description": "Promoting sustainability, zero-waste campus living, and botanical drives.",
+    "category": "Social Impact",
+    "leadId": "usr-admin-green",
+    "leadName": "Sophia Patel",
+    "memberCount": 51,
+    "status": "approved",
+    "contactEmail": "greencampus@campus.edu",
+    "imageUrl": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80",
+    "createdAt": "2026-09-05"
+  },
+  {
+    "id": "club-5",
+    "name": "AI Researchers Guild",
+    "description": "Paper reading groups, open-source LLM benchmarking, and ML hackathons.",
+    "category": "Technology",
+    "leadId": "usr-admin-ai",
+    "leadName": "Tariq Mansour",
+    "memberCount": 14,
+    "status": "pending",
+    "contactEmail": "aiguild@campus.edu",
+    "imageUrl": "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=600&q=80",
+    "createdAt": "2026-10-18"
+  }
+]
