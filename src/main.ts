@@ -9,6 +9,7 @@ import { SessionService } from './auth/session';
 import { ClubDiscoveryModule } from './modules/club-discovery/clubDiscovery';
 import { EventManagementModule } from './modules/event-management/eventManagement';
 import { ParticipationModule } from './modules/participation/participation';
+import { ClubManagementModule } from './modules/club-management/clubManagement';
 
 type NavTab = 'events' | 'clubs' | 'my-registrations' | 'club-admin' | 'platform-admin';
 
@@ -28,7 +29,14 @@ class AppController {
     // 4. Listen for persona/role changes
     SessionService.subscribe(user => {
       this.updateNavigationVisibility(user.role);
-      this.renderActiveTab();
+      // Auto-switch to appropriate landing tab when role changes
+      if (user.role === 'club_admin') {
+        this.setActiveTab('club-admin');
+      } else if (user.role === 'platform_admin') {
+        this.setActiveTab('platform-admin');
+      } else {
+        this.setActiveTab('events');
+      }
     });
 
     // 5. Initial render
@@ -118,7 +126,7 @@ class AppController {
         break;
 
       case 'club-admin':
-        this.renderAdminPlaceholder(mainContent, 'Club Admin Portal', 'Phase (d) will implement event creation, editing, deletion, and attendee tracking for your club.');
+        ClubManagementModule.render(mainContent);
         break;
 
       case 'platform-admin':
