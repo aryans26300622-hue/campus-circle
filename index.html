@@ -43,8 +43,17 @@
             </button>
           </nav>
 
-          <!-- Role Selector Dropdown -->
+          <!-- Role Selector Dropdown & Notification Bell -->
           <div class="user-controls">
+            <!-- Notification Bell -->
+            <div class="notif-bell-wrap">
+              <button id="notif-bell-btn" class="bell-btn" aria-label="Notifications" title="Notifications">
+                <span class="bell-icon">🔔</span>
+                <span id="notif-badge" class="notif-badge hidden">0</span>
+              </button>
+              <div id="notif-dropdown" class="notif-dropdown hidden"></div>
+            </div>
+
             <div class="role-selector-wrap">
               <span class="role-label-text">Viewing as:</span>
               <select id="role-select" class="role-dropdown" aria-label="Select User Role">

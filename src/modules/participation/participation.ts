@@ -9,6 +9,7 @@ import { Registration } from '../../models/registration';
 import { StorageService } from '../../storage/storageService';
 import { SessionService } from '../../auth/session';
 import { AppNotification } from '../../models/notification';
+import { NotificationServiceModule } from '../notifications/notificationService';
 
 export interface RegistrationResult {
   success: boolean;
@@ -90,6 +91,7 @@ export class ParticipationModule {
     };
     notifications.unshift(newNotif);
     StorageService.saveNotifications(notifications);
+    NotificationServiceModule.updateUI();
 
     return {
       success: true,
@@ -140,6 +142,7 @@ export class ParticipationModule {
       };
       notifications.unshift(cancelNotif);
       StorageService.saveNotifications(notifications);
+      NotificationServiceModule.updateUI();
     }
 
     return {

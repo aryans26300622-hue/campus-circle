@@ -11,6 +11,7 @@ import { EventManagementModule } from './modules/event-management/eventManagemen
 import { ParticipationModule } from './modules/participation/participation';
 import { ClubManagementModule } from './modules/club-management/clubManagement';
 import { UniversityAdminModule } from './modules/university-admin/universityAdmin';
+import { NotificationServiceModule } from './modules/notifications/notificationService';
 
 type NavTab = 'events' | 'clubs' | 'my-registrations' | 'club-admin' | 'platform-admin';
 
@@ -21,8 +22,9 @@ class AppController {
     // 1. Initialize localStorage persistence with seed data
     StorageService.init();
 
-    // 2. Initialize header role switcher
+    // 2. Initialize header role switcher & notification bell
     SessionService.initRoleSwitcher('role-select');
+    NotificationServiceModule.init();
 
     // 3. Set up navigation tab click listeners
     this.initNavigation();
@@ -30,6 +32,7 @@ class AppController {
     // 4. Listen for persona/role changes
     SessionService.subscribe(user => {
       this.updateNavigationVisibility(user.role);
+      NotificationServiceModule.updateUI();
       // Auto-switch to appropriate landing tab when role changes
       if (user.role === 'club_admin') {
         this.setActiveTab('club-admin');
