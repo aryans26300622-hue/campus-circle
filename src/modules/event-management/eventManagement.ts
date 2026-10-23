@@ -1,17 +1,23 @@
 /**
  * @file eventManagement.ts
  * @description Implements HLD Module 3: Event Management.
- * Provides student event browsing, keyword search, category filtering, and date filtering.
+ * Provides student event browsing, search, filtering, and direct event registration actions.
  */
 
 import { StorageService } from '../../storage/storageService';
 import { SessionService } from '../../auth/session';
+import { ParticipationModule } from '../participation/participation';
 
 export class EventManagementModule {
   private static searchTerm: string = '';
   private static selectedCategory: string = 'All';
-  private static selectedDateFilter: string = 'all'; // 'all' | 'this_week' | 'this_month' | 'custom'
+  private static selectedDateFilter: string = 'all';
   private static customDate: string = '';
+
+  /**
+   * Callback to navigate to "My Registrations" tab when requested.
+   */
+  public static onNavigateToRegistrations?: () => void;
 
   /**
    * Renders the Student Events Feed into the target container.
@@ -25,6 +31,9 @@ export class EventManagementModule {
             <p class="page-subtitle">Explore workshops, hackathons, guest lectures, and campus socials.</p>
           </div>
         </div>
+
+        <!-- Feedback Alert Toast Banner -->
+        <div id="event-feed-feedback" class="feedback-banner hidden"></div>
 
         <!-- Filter and Search Toolbar -->
         <div class="filter-bar event-filter-bar">
@@ -107,17 +116,14 @@ export class EventManagementModule {
 
     // Filter events
     const filtered = allEvents.filter(event => {
-      // 1. Keyword search (title, description, or host club name)
       const matchesSearch =
         event.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         event.description.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         event.clubName.toLowerCase().includes(this.searchTerm.toLowerCase());
 
-      // 2. Category filter
       const matchesCategory =
         this.selectedCategory === 'All' || event.category === this.selectedCategory;
 
-      // 3. Date filter
       const matchesDate = this.checkDateMatch(event.date);
 
       return matchesSearch && matchesCategory && matchesDate;
@@ -144,6 +150,7 @@ export class EventManagementModule {
         );
         const isFull = event.registeredCount >= event.capacity;
         const spotsLeft = Math.max(0, event.capacity - event.registeredCount);
+        const isStudent = currentUser.role === 'student';
 
         return `
         <article class="card event-card">
@@ -186,13 +193,39 @@ export class EventManagementModule {
                 ? `<span class="badge badge-registered">✓ You are registered</span>`
                 : isFull
                 ? `<span class="badge badge-full-warning">Fully Booked</span>`
-                : `<span class="badge badge-open">Registration Open</span>`
+                : `<span class="badge badge-open">Open Seats Available</span>`
             }
-            <button 
-              class="btn ${isRegistered ? 'btn-secondary' : 'btn-primary'} btn-sm btn-event-action" 
-              data-event-id="${event.id}">
-              ${isRegistered ? 'Manage Registration' : 'View / Register'}
-            </button>
+
+            ${
+              isStudent
+                ? isRegistered
+                  ? `
+                  <button 
+                    class="btn btn-secondary btn-sm btn-cancel-event-inline" 
+                    data-event-id="${event.id}" 
+                    data-event-title="${event.title}">
+                    Unregister
+                  </button>
+                `
+                  : isFull
+                  ? `
+                  <button class="btn btn-outline btn-sm" disabled style="opacity: 0.6; cursor: not-allowed;">
+                    Full
+                  </button>
+                `
+                  : `
+                  <button 
+                    class="btn btn-primary btn-sm btn-register-event" 
+                    data-event-id="${event.id}">
+                    Register Now
+                  </button>
+                `
+                : `
+                <span style="font-size: 0.8rem; color: var(--text-muted);">
+                  (${currentUser.role.replace('_', ' ')})
+                </span>
+              `
+            }
           </div>
         </article>
       `;
@@ -242,7 +275,7 @@ export class EventManagementModule {
         });
       }
     } catch {
-      // Fallback to raw string
+      // Fallback
     }
     return dateStr;
   }
@@ -283,21 +316,52 @@ export class EventManagementModule {
 
     const grid = document.getElementById('events-grid');
     grid?.addEventListener('click', e => {
-      const button = (e.target as HTMLElement).closest('.btn-event-action') as HTMLButtonElement | null;
-      if (!button) return;
+      const target = e.target as HTMLElement;
 
-      const eventId = button.dataset.eventId;
-      // In Phase (b), trigger an informative toast/alert guiding the user towards registration
-      const event = StorageService.getEvents().find(ev => ev.id === eventId);
-      if (event) {
-        alert(
-          `Event Selected: "${event.title}"\n` +
-          `Date: ${event.date} at ${event.time}\n` +
-          `Location: ${event.location}\n` +
-          `Status: ${event.registeredCount}/${event.capacity} seats taken\n\n` +
-          `Full registration/unregistration flow is unlocked in Phase (c)!`
-        );
+      // Handle Register click
+      const registerBtn = target.closest('.btn-register-event') as HTMLButtonElement | null;
+      if (registerBtn) {
+        const eventId = registerBtn.dataset.eventId;
+        if (!eventId) return;
+
+        const currentUser = SessionService.getCurrentUser();
+        const result = ParticipationModule.register(currentUser.id, eventId);
+
+        this.showFeedback(result.message, result.success);
+        this.renderEventsList();
+        return;
+      }
+
+      // Handle Unregister click
+      const cancelBtn = target.closest('.btn-cancel-event-inline') as HTMLButtonElement | null;
+      if (cancelBtn) {
+        const eventId = cancelBtn.dataset.eventId;
+        const eventTitle = cancelBtn.dataset.eventTitle;
+        if (!eventId) return;
+
+        const confirmed = window.confirm(`Unregister from "${eventTitle}"?`);
+        if (confirmed) {
+          const currentUser = SessionService.getCurrentUser();
+          const result = ParticipationModule.cancelRegistration(currentUser.id, eventId);
+          this.showFeedback(result.message, result.success);
+          this.renderEventsList();
+        }
       }
     });
+  }
+
+  private static showFeedback(message: string, isSuccess: boolean): void {
+    const banner = document.getElementById('event-feed-feedback');
+    if (!banner) return;
+
+    banner.textContent = message;
+    banner.className = `feedback-banner ${isSuccess ? 'feedback-success' : 'feedback-error'}`;
+    banner.classList.remove('hidden');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    setTimeout(() => {
+      banner.classList.add('hidden');
+    }, 4500);
   }
 }

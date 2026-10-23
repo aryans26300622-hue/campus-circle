@@ -8,6 +8,7 @@ import { StorageService } from './storage/storageService';
 import { SessionService } from './auth/session';
 import { ClubDiscoveryModule } from './modules/club-discovery/clubDiscovery';
 import { EventManagementModule } from './modules/event-management/eventManagement';
+import { ParticipationModule } from './modules/participation/participation';
 
 type NavTab = 'events' | 'clubs' | 'my-registrations' | 'club-admin' | 'platform-admin';
 
@@ -113,7 +114,7 @@ class AppController {
         break;
 
       case 'my-registrations':
-        this.renderMyRegistrationsPlaceholder(mainContent);
+        ParticipationModule.renderMyRegistrations(mainContent, () => this.setActiveTab('events'));
         break;
 
       case 'club-admin':
@@ -129,35 +130,7 @@ class AppController {
     }
   }
 
-  private static renderMyRegistrationsPlaceholder(container: HTMLElement): void {
-    const registrations = StorageService.getRegistrations();
-    const currentUser = SessionService.getCurrentUser();
-    const myRegs = registrations.filter(r => r.studentId === currentUser.id && r.status === 'REGISTERED');
 
-    container.innerHTML = `
-      <section class="section-container">
-        <div class="section-header">
-          <div>
-            <h1 class="page-title">My Registered Events</h1>
-            <p class="page-subtitle">Track events you have signed up for.</p>
-          </div>
-        </div>
-
-        <div style="background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; text-align: center;">
-          <p style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎟️</p>
-          <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">You currently have ${myRegs.length} active registration(s)</h3>
-          <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 1.5rem auto;">
-            Full registration creation, cancellation, and seat-capacity validation will be unlocked in <strong>Phase (c)</strong>.
-          </p>
-          <button class="btn btn-primary" id="btn-browse-events-now">Browse Available Events</button>
-        </div>
-      </section>
-    `;
-
-    document.getElementById('btn-browse-events-now')?.addEventListener('click', () => {
-      this.setActiveTab('events');
-    });
-  }
 
   private static renderAdminPlaceholder(container: HTMLElement, title: string, description: string): void {
     container.innerHTML = `
