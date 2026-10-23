@@ -1,97 +1,181 @@
 /**
  * @file main.ts
- * @description Main entry point for the CampusCircle application.
- * Initializes storage, sets up role switching, and coordinates view rendering.
+ * @description Main application controller and router for CampusCircle.
+ * Coordinates view rendering across HLD modules based on active navigation tab and user role.
  */
 
 import { StorageService } from './storage/storageService';
 import { SessionService } from './auth/session';
+import { ClubDiscoveryModule } from './modules/club-discovery/clubDiscovery';
+import { EventManagementModule } from './modules/event-management/eventManagement';
 
-function initApp(): void {
-  // 1. Initialize persistent storage with initial seed data
-  StorageService.init();
+type NavTab = 'events' | 'clubs' | 'my-registrations' | 'club-admin' | 'platform-admin';
 
-  // 2. Set up role switcher in the header
-  SessionService.initRoleSwitcher('role-select');
+class AppController {
+  private static activeTab: NavTab = 'events';
 
-  // 3. Render initial verification dashboard for Phase (a)
-  renderPhaseAWelcome();
+  public static init(): void {
+    // 1. Initialize localStorage persistence with seed data
+    StorageService.init();
 
-  // 4. Re-render when role switcher changes
-  SessionService.subscribe(() => {
-    renderPhaseAWelcome();
-  });
+    // 2. Initialize header role switcher
+    SessionService.initRoleSwitcher('role-select');
+
+    // 3. Set up navigation tab click listeners
+    this.initNavigation();
+
+    // 4. Listen for persona/role changes
+    SessionService.subscribe(user => {
+      this.updateNavigationVisibility(user.role);
+      this.renderActiveTab();
+    });
+
+    // 5. Initial render
+    const currentUser = SessionService.getCurrentUser();
+    this.updateNavigationVisibility(currentUser.role);
+    this.renderActiveTab();
+  }
+
+  private static initNavigation(): void {
+    const nav = document.getElementById('main-nav');
+    nav?.addEventListener('click', e => {
+      const target = (e.target as HTMLElement).closest('.nav-tab') as HTMLButtonElement | null;
+      if (!target) return;
+
+      const tab = target.dataset.tab as NavTab;
+      if (tab) {
+        this.setActiveTab(tab);
+      }
+    });
+
+    // Brand logo returns to Events tab
+    document.getElementById('brand-logo')?.addEventListener('click', e => {
+      e.preventDefault();
+      this.setActiveTab('events');
+    });
+  }
+
+  public static setActiveTab(tab: NavTab): void {
+    this.activeTab = tab;
+
+    // Update active class on nav buttons
+    const buttons = document.querySelectorAll('.nav-tab');
+    buttons.forEach(btn => {
+      const buttonTab = (btn as HTMLElement).dataset.tab;
+      if (buttonTab === tab) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    this.renderActiveTab();
+  }
+
+  private static updateNavigationVisibility(role: string): void {
+    const clubAdminTab = document.getElementById('tab-club-admin');
+    const platformAdminTab = document.getElementById('tab-platform-admin');
+    const myRegistrationsTab = document.getElementById('tab-my-registrations');
+
+    if (role === 'club_admin') {
+      clubAdminTab?.classList.remove('hidden');
+      platformAdminTab?.classList.add('hidden');
+    } else if (role === 'platform_admin') {
+      platformAdminTab?.classList.remove('hidden');
+      clubAdminTab?.classList.add('hidden');
+    } else {
+      // Student
+      clubAdminTab?.classList.add('hidden');
+      platformAdminTab?.classList.add('hidden');
+    }
+
+    // Only students have 'My Registrations'
+    if (role === 'student') {
+      myRegistrationsTab?.classList.remove('hidden');
+    } else {
+      myRegistrationsTab?.classList.add('hidden');
+    }
+  }
+
+  private static renderActiveTab(): void {
+    const mainContent = document.getElementById('main-content');
+    if (!mainContent) return;
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    switch (this.activeTab) {
+      case 'events':
+        EventManagementModule.renderFeed(mainContent);
+        break;
+
+      case 'clubs':
+        ClubDiscoveryModule.render(mainContent);
+        break;
+
+      case 'my-registrations':
+        this.renderMyRegistrationsPlaceholder(mainContent);
+        break;
+
+      case 'club-admin':
+        this.renderAdminPlaceholder(mainContent, 'Club Admin Portal', 'Phase (d) will implement event creation, editing, deletion, and attendee tracking for your club.');
+        break;
+
+      case 'platform-admin':
+        this.renderAdminPlaceholder(mainContent, 'Platform & University Administration', 'Phase (e) will implement new club approvals and review of flagged moderation reports.');
+        break;
+
+      default:
+        EventManagementModule.renderFeed(mainContent);
+    }
+  }
+
+  private static renderMyRegistrationsPlaceholder(container: HTMLElement): void {
+    const registrations = StorageService.getRegistrations();
+    const currentUser = SessionService.getCurrentUser();
+    const myRegs = registrations.filter(r => r.studentId === currentUser.id && r.status === 'REGISTERED');
+
+    container.innerHTML = `
+      <section class="section-container">
+        <div class="section-header">
+          <div>
+            <h1 class="page-title">My Registered Events</h1>
+            <p class="page-subtitle">Track events you have signed up for.</p>
+          </div>
+        </div>
+
+        <div style="background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; text-align: center;">
+          <p style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎟️</p>
+          <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">You currently have ${myRegs.length} active registration(s)</h3>
+          <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 1.5rem auto;">
+            Full registration creation, cancellation, and seat-capacity validation will be unlocked in <strong>Phase (c)</strong>.
+          </p>
+          <button class="btn btn-primary" id="btn-browse-events-now">Browse Available Events</button>
+        </div>
+      </section>
+    `;
+
+    document.getElementById('btn-browse-events-now')?.addEventListener('click', () => {
+      this.setActiveTab('events');
+    });
+  }
+
+  private static renderAdminPlaceholder(container: HTMLElement, title: string, description: string): void {
+    container.innerHTML = `
+      <section class="section-container">
+        <div class="section-header">
+          <h1 class="page-title">${title}</h1>
+        </div>
+        <div style="background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 3rem; text-align: center;">
+          <p style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔒</p>
+          <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Module Scheduled in Roadmap</h3>
+          <p style="color: var(--text-muted); max-width: 550px; margin: 0 auto;">${description}</p>
+        </div>
+      </section>
+    `;
+  }
 }
 
-function renderPhaseAWelcome(): void {
-  const mainContent = document.getElementById('main-content');
-  if (!mainContent) return;
-
-  const currentUser = SessionService.getCurrentUser();
-  const clubs = StorageService.getClubs();
-  const events = StorageService.getEvents();
-  const registrations = StorageService.getRegistrations();
-  const notifications = StorageService.getNotifications();
-  const reports = StorageService.getReports();
-
-  mainContent.innerHTML = `
-    <div style="max-width: 750px; margin: 2rem auto; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-        <span style="font-size: 2rem;">🚀</span>
-        <div>
-          <h2 style="font-size: 1.5rem; color: #1e293b; margin: 0;">CampusCircle — System Initialized</h2>
-          <p style="color: #64748b; margin-top: 0.25rem;">Phase (a) Setup, strict models, and persistent storage are ready.</p>
-        </div>
-      </div>
-
-      <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
-        <p style="font-weight: 600; color: #1e40af; margin-bottom: 0.25rem;">Active Persona:</p>
-        <p style="color: #1e293b;">
-          <strong>${currentUser.name}</strong> (${currentUser.email}) — 
-          <span style="background: #dbeafe; color: #1e40af; padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; text-transform: capitalize;">
-            ${currentUser.role.replace('_', ' ')}
-          </span>
-        </p>
-      </div>
-
-      <h3 style="font-size: 1.1rem; color: #334155; margin-bottom: 0.75rem;">Loaded Storage Entities (from Seed Data):</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem;">
-        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; text-align: center; background: #f8fafc;">
-          <div style="font-size: 1.5rem; font-weight: bold; color: #2563eb;">${clubs.length}</div>
-          <div style="font-size: 0.8rem; color: #64748b;">Clubs</div>
-        </div>
-        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; text-align: center; background: #f8fafc;">
-          <div style="font-size: 1.5rem; font-weight: bold; color: #2563eb;">${events.length}</div>
-          <div style="font-size: 0.8rem; color: #64748b;">Events</div>
-        </div>
-        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; text-align: center; background: #f8fafc;">
-          <div style="font-size: 1.5rem; font-weight: bold; color: #2563eb;">${registrations.length}</div>
-          <div style="font-size: 0.8rem; color: #64748b;">Registrations</div>
-        </div>
-        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; text-align: center; background: #f8fafc;">
-          <div style="font-size: 1.5rem; font-weight: bold; color: #2563eb;">${notifications.length}</div>
-          <div style="font-size: 0.8rem; color: #64748b;">Notifications</div>
-        </div>
-        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; text-align: center; background: #f8fafc;">
-          <div style="font-size: 1.5rem; font-weight: bold; color: #2563eb;">${reports.length}</div>
-          <div style="font-size: 0.8rem; color: #64748b;">Reports</div>
-        </div>
-      </div>
-
-      <div style="border-top: 1px solid #e2e8f0; padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 0.875rem; color: #64748b;">Next phase: Student Event & Club Browsing</span>
-        <button id="btn-reset-storage" style="background: none; border: 1px solid #cbd5e1; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.8rem; color: #64748b; cursor: pointer;">
-          Reset Storage to Defaults
-        </button>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('btn-reset-storage')?.addEventListener('click', () => {
-    StorageService.resetToDefaults();
-    renderPhaseAWelcome();
-  });
-}
-
-// Run on page load
-document.addEventListener('DOMContentLoaded', initApp);
+// Run when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  AppController.init();
+});
