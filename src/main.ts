@@ -47,6 +47,16 @@ class AppController {
     const currentUser = SessionService.getCurrentUser();
     this.updateNavigationVisibility(currentUser.role);
     this.renderActiveTab();
+
+    // 6. Footer Reset Button
+    document.getElementById('btn-footer-reset-data')?.addEventListener('click', () => {
+      if (window.confirm('Reset all demo clubs, events, registrations, and notifications back to initial seed state?')) {
+        StorageService.resetToDefaults();
+        NotificationServiceModule.updateUI();
+        SessionService.initRoleSwitcher('role-select');
+        this.renderActiveTab();
+      }
+    });
   }
 
   private static initNavigation(): void {
